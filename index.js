@@ -3,12 +3,21 @@ const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
 const fs = require("fs").promises;
 const path = require("path");
+const cors = require("cors");
+const morgan = require("morgan");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, "data.json");
 
-// Middleware
+// New middleware setup
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
+app.use(morgan("dev"));
 app.use(bodyParser.json());
 
 // Initialize data file if it doesn't exist
@@ -107,9 +116,21 @@ app.delete("/api/:entity/:id", async (req, res) => {
   }
 });
 
-// Start server
+// Add this above the initializeDataFile().then() block
+const ASCII_ART = `
+▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+█ MinionDoc API Server Started! █
+█      Now serving requests      █
+▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+`;
+
+// Update server startup logs
 initializeDataFile().then(() => {
   app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(ASCII_ART);
+    console.log(`🦸♂️  Server running on port ${PORT}`);
+    console.log(`📁 Data file: ${DATA_FILE}`);
+    console.log(`🌐 CORS enabled for all origins`);
+    console.log(`📝 Request logging activated`);
   });
 });
